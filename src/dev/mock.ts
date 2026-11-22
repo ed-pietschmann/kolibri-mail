@@ -347,6 +347,7 @@ const escapeHtml = (x: string) =>
   x.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const fillTemplate = (tpl: string, content: string, subject: string) =>
   tpl
+    .replace(/\{\{t:(\w+)\}\}/g, (_, k: string) => `[${k}]`)
     .replaceAll('{{name}}', 'Eddie Beispiel')
     .replaceAll('{{email}}', 'eddie@beispiel.de')
     .replaceAll('{{betreff}}', escapeHtml(subject.trim()))

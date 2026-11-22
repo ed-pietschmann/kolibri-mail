@@ -26,7 +26,11 @@ pub fn new_mail(app: &AppHandle, fresh: &[MessageSummary]) {
         }
     };
     if fresh.len() > MAX_SINGLE {
-        show("Kolibri", &format!("{} neue Nachrichten", fresh.len()));
+        let text = match kolibri_core::lang::current() {
+            kolibri_core::lang::Lang::De => format!("{} neue Nachrichten", fresh.len()),
+            kolibri_core::lang::Lang::En => format!("{} new messages", fresh.len()),
+        };
+        show("Kolibri", &text);
         return;
     }
     for m in fresh {
@@ -36,7 +40,7 @@ pub fn new_mail(app: &AppHandle, fresh: &[MessageSummary]) {
             &m.from_name
         };
         let subject = if m.subject.trim().is_empty() {
-            "(Kein Betreff)"
+            kolibri_core::lang::tr("(Kein Betreff)", "(No subject)")
         } else {
             &m.subject
         };

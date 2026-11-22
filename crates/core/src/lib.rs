@@ -6,6 +6,7 @@
 mod compose;
 mod error;
 mod folder;
+pub mod lang;
 mod message;
 mod server;
 

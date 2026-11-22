@@ -6,7 +6,7 @@ Reduziert auf das Wesentliche: weniger Features, dafür jedes richtig gut.
 ## Für Claude: Arbeitsweise
 
 - Der Nutzer programmiert etwas, ist aber kein Profi. Wichtige Entscheidungen kurz (2–3 Sätze)
-  begründen und genaue Befehle nennen. Kommunikation auf **Deutsch**.
+  begründen und genaue Befehle nennen. Kommunikation auf **Deutsch**. Neue UI-Texte immer in `de.ts` und `en.ts`.
 - Meilenstein für Meilenstein. Am Ende jedes Meilensteins: App lauffähig, selbst getestet,
   `pnpm lint` grün, `pnpm measure` ausgeführt, Git-Commit, kurze Zusammenfassung
   (gebaut, Messwerte, bekannte Probleme, nächster Schritt).
@@ -291,6 +291,17 @@ Initialen-Avatare. Composer schwebt unten rechts (verkleinern/vergrößern), Les
 bleiben dabei möglich (ersetzt das automatische Sichern beim Wegklicken aus 1.0.1). Vibrancy
 entfernt. Update-Befehl `pnpm update-app` (Tests: `KOLIBRI_APP_DST=<ordner>` installiert woanders,
 ohne die laufende App zu beenden). Kontrast-Modus greift jetzt auch im hellen Modus.
+
+**1.5.0:** Englisch zusätzlich zu Deutsch. Sprache = Systemsprache, ermittelt in Rust (`sys-locale`;
+die Mac-Web-Ansicht kennt nur die Sprachen des Bundles) und beim Start gesetzt
+(`kolibri_core::lang`); Oberfläche fragt `ui_language` und lädt `App.svelte` erst danach
+(Datumsformate entstehen beim Import). `?lang=en` in der Vorschau. Texte: `src/lib/i18n/de.ts` +
+`en.ts` (gleiche Schlüssel, TS prüft), `locale.intl` für Intl-Formate. Rust: Fehlertexte bleiben
+deutsch im Code, `Error::new` übersetzt über die Tabelle in `crates/core/src/lang.rs` (Muster mit
+`{}`) – neue Meldung = dort Zeile ergänzen; Mail-Texte (Zitat-Kopf, Weiterleitung, Einladungen,
+Mitteilungen, `long_date`) über `lang::tr`/`current()`. Designs: Texte als `{{t:schlüssel}}`
+(Rust `DESIGN_TEXTS`, Vorschau `designTexts()`), Namen über `templateName()`; Migration 013.
+README.md englisch, README.de.md deutsch.
 
 **1.4.0:** Öffentlich auf GitHub (`ed-pietschmann/kolibri-mail`, MIT) mit Windows-Vorschau.
 Windows: Passwörter über `keyring` (Anmeldeinformationsverwaltung, nur unter Windows eingebunden),

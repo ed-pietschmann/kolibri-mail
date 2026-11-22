@@ -4,7 +4,7 @@
   import { SvelteMap } from 'svelte/reactivity';
   import { api, type MessageScope, type MessageSummary } from '../api';
   import { displayName, listDate } from '../format';
-  import { t } from '../i18n';
+  import { locale, t } from '../i18n';
   import { mail } from '../mail.svelte';
   import Icon from './Icon.svelte';
 
@@ -245,7 +245,7 @@
           {t('list.offline', { n: mail.offlinePending })}
         </span>
       {:else if loaded && total > 0}
-        <span class="count">{t('list.count', { n: total.toLocaleString('de-DE') })}</span>
+        <span class="count">{t('list.count', { n: total.toLocaleString(locale.intl) })}</span>
       {/if}
     </div>
     <div class="actions">

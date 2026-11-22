@@ -60,6 +60,28 @@ pub fn report_ready(window: WebviewWindow, page_ms: f64) -> Result<u64> {
 
 /// Fehler aus der Oberfläche (JavaScript) ins Protokoll schreiben, damit sie im
 /// Release-Build (ohne Entwicklerwerkzeuge) nachvollziehbar sind.
+/// Systemsprache (z. B. „de-DE“) – direkt vom Betriebssystem, weil die Web-Ansicht
+/// auf dem Mac nur die Sprachen kennt, die im App-Bundle eingetragen sind.
+pub fn system_language() -> String {
+    sys_locale::get_locale().unwrap_or_else(|| "en".to_owned())
+}
+
+/// Sprachcode für die Oberfläche („de“ oder „en“).
+#[tauri::command]
+pub fn ui_language() -> &'static str {
+    match kolibri_core::lang::current() {
+        kolibri_core::lang::Lang::De => "de",
+        kolibri_core::lang::Lang::En => "en",
+    }
+}
+
+/// Sprache wechseln (Test-Schalter `?lang=en` in der Vorschau / spätere Einstellung) –
+/// gilt für Fehlermeldungen, Zitat-Köpfe, Einladungs-Mails und Mitteilungen.
+#[tauri::command]
+pub fn set_language(code: String) {
+    kolibri_core::lang::set(kolibri_core::lang::from_code(&code));
+}
+
 #[tauri::command]
 pub fn report_frontend_error(message: String) {
     let short: String = message.chars().take(2000).collect();

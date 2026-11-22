@@ -17,6 +17,7 @@
     loadLibrary,
     rememberTemplate,
     signaturesOf,
+    templateName,
   } from '../library.svelte';
   import HtmlPreview from './HtmlPreview.svelte';
   import AddressInput from './AddressInput.svelte';
@@ -536,7 +537,7 @@
             {#if library.templates.length}
               <optgroup label={t('compose.design.templates')}>
                 {#each library.templates as tpl (tpl.id)}
-                  <option value="t:{tpl.id}">{tpl.name}</option>
+                  <option value="t:{tpl.id}">{templateName(tpl)}</option>
                 {/each}
               </optgroup>
             {/if}

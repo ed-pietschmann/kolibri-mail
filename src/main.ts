@@ -1,7 +1,7 @@
 import { mount, tick } from 'svelte';
 import { invoke } from '@tauri-apps/api/core';
 import './app.css';
-import App from './App.svelte';
+import { setLocale } from './lib/i18n';
 import { isMac } from './lib/platform';
 
 // Plattform für CSS (z. B. kein Platz für die Mac-Fensterknöpfe unter Windows).
@@ -21,9 +21,26 @@ function reportError(what: unknown) {
 window.addEventListener('error', (e) => reportError(e.error ?? e.message));
 window.addEventListener('unhandledrejection', (e) => reportError(e.reason));
 
+// Sprache festlegen, bevor Texte und Datumsformate entstehen: Systemsprache vom
+// Backend; zum Testen `?lang=en` bzw. `?lang=de` an die Adresse hängen.
+const wanted = new URLSearchParams(location.search).get('lang');
+let lang: 'de' | 'en' = 'de';
+try {
+  lang = (await invoke<string>('ui_language')) === 'en' ? 'en' : 'de';
+} catch {
+  lang = navigator.language.toLowerCase().startsWith('de') ? 'de' : 'en';
+}
+if (wanted === 'de' || wanted === 'en') {
+  lang = wanted;
+  invoke('set_language', { code: lang }).catch(() => {});
+}
+setLocale(lang);
+
 const target = document.getElementById('app');
 if (!target) throw new Error('#app fehlt in index.html');
 
+// Erst jetzt laden: Module legen beim Import Datumsformate in der gewählten Sprache an.
+const { default: App } = await import('./App.svelte');
 mount(App, { target });
 
 // Sobald das DOM steht, darf das Backend das (bis dahin unsichtbare) Fenster

@@ -2,6 +2,7 @@
  * Signaturen und Vorlagen (klein, wird erst beim Verfassen bzw. Bearbeiten geladen).
  */
 import { api, CONTENT_PLACEHOLDER, type Signature, type Template } from './api';
+import { has, t } from './i18n';
 
 export const library = $state({
   signatures: [] as Signature[],
@@ -26,6 +27,21 @@ export function loadLibrary(force = false): Promise<void> {
 
 export function signaturesOf(accountId: number): Signature[] {
   return library.signatures.filter((s) => s.accountId === accountId);
+}
+
+/** Anzeigename: mitgelieferte Designs übersetzt, eigene unverändert. */
+export function templateName(tpl: Pick<Template, 'name' | 'builtin'>): string {
+  if (!tpl.builtin) return tpl.name;
+  const key = `design.${tpl.name}`;
+  return has(key) ? t(key) : tpl.name;
+}
+
+/** `{{t:schlüssel}}` in Designs für die Vorschau ausfüllen (beim Senden macht das Rust). */
+export function designTexts(html: string): string {
+  return html.replace(/\{\{t:(\w+)\}\}/g, (all, name: string) => {
+    const key = `designText.${name}`;
+    return has(key) ? t(key) : all;
+  });
 }
 
 /** Vorlage mit Platz für eigenen Text? (Sonst: fertige Mail aus Code.) */

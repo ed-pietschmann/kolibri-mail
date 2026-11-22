@@ -179,10 +179,12 @@ fn mime_for(name: &str) -> &'static str {
     }
 }
 
-/// „Mittwoch, 19. November 2026 um 14:05“ (Ortszeit).
-pub fn german_date(unix: i64) -> String {
+/// „Mittwoch, 19. November 2026 um 14:05“ bzw. „Wednesday, 19 November 2026 at 14:05“
+/// (Ortszeit, Sprache der Oberfläche).
+pub fn long_date(unix: i64) -> String {
     use chrono::{Datelike, Local, TimeZone, Timelike};
-    const DAYS: [&str; 7] = [
+    use kolibri_core::lang::{Lang, current};
+    const DAYS_DE: [&str; 7] = [
         "Montag",
         "Dienstag",
         "Mittwoch",
@@ -191,7 +193,7 @@ pub fn german_date(unix: i64) -> String {
         "Samstag",
         "Sonntag",
     ];
-    const MONTHS: [&str; 12] = [
+    const MONTHS_DE: [&str; 12] = [
         "Januar",
         "Februar",
         "März",
@@ -205,18 +207,59 @@ pub fn german_date(unix: i64) -> String {
         "November",
         "Dezember",
     ];
+    const DAYS_EN: [&str; 7] = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ];
+    const MONTHS_EN: [&str; 12] = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
     let Some(d) = Local.timestamp_opt(unix, 0).single() else {
         return String::new();
     };
-    format!(
-        "{}, {}. {} {} um {:02}:{:02}",
-        DAYS[d.weekday().num_days_from_monday() as usize],
-        d.day(),
-        MONTHS[d.month0() as usize],
-        d.year(),
-        d.hour(),
-        d.minute()
-    )
+    let day = d.weekday().num_days_from_monday() as usize;
+    let month = d.month0() as usize;
+    match current() {
+        Lang::De => format!(
+            "{}, {}. {} {} um {:02}:{:02}",
+            DAYS_DE[day],
+            d.day(),
+            MONTHS_DE[month],
+            d.year(),
+            d.hour(),
+            d.minute()
+        ),
+        Lang::En => format!(
+            "{}, {} {} {} at {:02}:{:02}",
+            DAYS_EN[day],
+            d.day(),
+            MONTHS_EN[month],
+            d.year(),
+            d.hour(),
+            d.minute()
+        ),
+    }
+}
+
+/// Trenner zwischen Datum und Uhrzeit in [`long_date`].
+pub fn date_time_separator() -> &'static str {
+    kolibri_core::lang::tr(" um ", " at ")
 }
 
 /// Inhalt einer Mail für Zitate: Text bevorzugt (wird im Editor sauber),
@@ -231,12 +274,12 @@ pub fn quotable(body: &kolibri_core::Body) -> String {
 
 /// Zitat für Antworten.
 pub fn reply_quote(sender: &str, date: i64, body: &kolibri_core::Body) -> String {
-    format!(
-        "<p>Am {} schrieb {}:</p><blockquote>{}</blockquote>",
-        escape_html(&german_date(date)),
-        escape_html(sender),
-        quotable(body)
-    )
+    let (date, sender) = (escape_html(&long_date(date)), escape_html(sender));
+    let head = match kolibri_core::lang::current() {
+        kolibri_core::lang::Lang::De => format!("Am {date} schrieb {sender}:"),
+        kolibri_core::lang::Lang::En => format!("On {date}, {sender} wrote:"),
+    };
+    format!("<p>{head}</p><blockquote>{}</blockquote>", quotable(body))
 }
 
 /// Block für Weiterleitungen.
@@ -247,12 +290,21 @@ pub fn forward_block(
     to: &str,
     body: &kolibri_core::Body,
 ) -> String {
+    use kolibri_core::lang::tr;
     format!(
-        "<p>Anfang der weitergeleiteten Nachricht:</p><blockquote><p><strong>Von:</strong> {}<br>\
-<strong>Betreff:</strong> {}<br><strong>Datum:</strong> {}<br><strong>An:</strong> {}</p>{}</blockquote>",
+        "<p>{}</p><blockquote><p><strong>{}</strong> {}<br>\
+<strong>{}</strong> {}<br><strong>{}</strong> {}<br><strong>{}</strong> {}</p>{}</blockquote>",
+        tr(
+            "Anfang der weitergeleiteten Nachricht:",
+            "Begin forwarded message:"
+        ),
+        tr("Von:", "From:"),
         escape_html(from),
+        tr("Betreff:", "Subject:"),
         escape_html(subject),
-        escape_html(&german_date(date)),
+        tr("Datum:", "Date:"),
+        escape_html(&long_date(date)),
+        tr("An:", "To:"),
         escape_html(to),
         quotable(body)
     )
@@ -275,12 +327,32 @@ pub fn fill_template(template: &str, content: &str, account: &Account, subject: 
     } else {
         account.display_name.trim()
     };
-    template
-        .replace("{{name}}", &escape_html(name))
+    let mut out = template.to_owned();
+    // Texte der mitgelieferten Designs in der Sprache der App.
+    for (key, de, en) in DESIGN_TEXTS {
+        out = out.replace(&format!("{{{{t:{key}}}}}"), kolibri_core::lang::tr(de, en));
+    }
+    out.replace("{{name}}", &escape_html(name))
         .replace("{{email}}", &escape_html(&account.email))
         .replace("{{betreff}}", &escape_html(subject.trim()))
+        .replace("{{subject}}", &escape_html(subject.trim()))
         .replace("{{inhalt}}", content)
+        .replace("{{content}}", content)
 }
+
+/// `{{t:schlüssel}}` in Designs → Deutsch / Englisch (siehe scripts/gen-templates.py).
+const DESIGN_TEXTS: &[(&str, &str, &str)] = &[
+    ("note", "Kurz notiert", "Quick note"),
+    ("subject", "Betreff:", "Subject:"),
+    ("reply", "Antworten", "Reply"),
+    ("invitation", "Einladung", "Invitation"),
+    ("warmly", "Herzlich,", "Warmly,"),
+    (
+        "hello_from",
+        "Hallo aus dem Postfach von",
+        "Hello from the inbox of",
+    ),
+];
 
 /// Eingebettetes Bild (aus einer data:-URI), wird als `cid:` mitgeschickt.
 struct InlineImage {
@@ -632,6 +704,13 @@ mod tests {
     }
 
     #[test]
+    fn design_texts_follow_language() {
+        let tpl = "<p>{{t:invitation}}</p>{{content}}<i>{{subject}}</i>";
+        let de = fill_template(tpl, "X", &account(), "Fest");
+        assert_eq!(de, "<p>Einladung</p>X<i>Fest</i>");
+    }
+
+    #[test]
     fn invitations_carry_calendar_part_and_file() {
         let ics = "BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\nUID:x\r\nDTSTART:20270101T100000Z\r\nSUMMARY:Planung\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
         let built = build_itip(
@@ -787,7 +866,7 @@ mod tests {
             q.contains("<blockquote><p>Hallo &lt;du&gt;<br>Zeile 2</p></blockquote>"),
             "{q}"
         );
-        assert!(german_date(1_700_000_000).contains("2023 um"));
+        assert!(long_date(1_700_000_000).contains("2023 um"));
         let f = forward_block("A", "Betreff", 0, "B", &body);
         assert!(f.contains("<strong>Betreff:</strong> Betreff"));
     }

@@ -5,7 +5,7 @@
   import { describeError } from '../errors';
   import { displayName, fileSize, fullDate, listDate } from '../format';
   import { spanText, fmtLong, fromUnix } from '../calendar';
-  import { t } from '../i18n';
+  import { locale, t } from '../i18n';
   import { mail } from '../mail.svelte';
   import Icon from './Icon.svelte';
   import MailFrame from './MailFrame.svelte';
@@ -151,7 +151,7 @@
         <div class="invite" class:cancelled={inv.method === 'CANCEL'}>
           <div class="cal-icon" aria-hidden="true">
             <span class="cal-month">
-              {new Intl.DateTimeFormat('de-DE', { month: 'short' }).format(fromUnix(inv.start))}
+              {new Intl.DateTimeFormat(locale.intl, { month: 'short' }).format(fromUnix(inv.start))}
             </span>
             <span class="cal-day">{fromUnix(inv.start).getDate()}</span>
           </div>

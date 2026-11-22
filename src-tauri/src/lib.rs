@@ -26,6 +26,8 @@ pub fn run() -> std::result::Result<(), tauri::Error> {
         .invoke_handler(tauri::generate_handler![
             startup::report_ready,
             startup::report_frontend_error,
+            startup::set_language,
+            startup::ui_language,
             accounts::discover_settings,
             accounts::add_account,
             accounts::list_accounts,
@@ -96,6 +98,9 @@ pub fn run() -> std::result::Result<(), tauri::Error> {
                     .max_file_size(1_000_000)
             };
             app.handle().plugin(log.build())?;
+
+            // Sprache vor allem anderen: Fehler, Mitteilungen und Mails nutzen sie.
+            kolibri_core::lang::set(kolibri_core::lang::from_code(&startup::system_language()));
 
             let data_dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&data_dir)?;

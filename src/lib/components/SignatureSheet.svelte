@@ -3,7 +3,7 @@
   import { tick } from 'svelte';
   import { api, ApiError, type Account, type Signature } from '../api';
   import { describeError } from '../errors';
-  import { t } from '../i18n';
+  import { t, type MessageKey } from '../i18n';
   import { loadLibrary, signaturesOf } from '../library.svelte';
   import HtmlPreview from './HtmlPreview.svelte';
   import Icon, { type IconName } from './Icon.svelte';
@@ -24,7 +24,7 @@
   let editing = $state<Signature | null>(null);
   let mode = $state<'visual' | 'code' | 'templates'>('visual');
   let fields = $state<SignatureFields>({
-    greeting: 'Viele Grüße',
+    greeting: t('signature.f.greetingDefault'),
     name: '',
     title: '',
     company: '',
@@ -37,6 +37,7 @@
     accent: '#0a84ff',
   });
   let layoutId = $state('logo');
+  const layoutName = (id: string) => t(`signature.layout.${id}` as MessageKey);
   let logoInput: HTMLInputElement | undefined = $state();
   const ACCENTS = [
     '#111113',
@@ -572,11 +573,11 @@
                   onclick={() => (layoutId = layout.id)}
                   ondblclick={applyLayout}
                 >
-                  <span class="tpl-name">{layout.name}</span>
+                  <span class="tpl-name">{layoutName(layout.id)}</span>
                   <span class="tpl-preview">
                     <HtmlPreview
                       html={signaturePage(layout.render(fields))}
-                      title={layout.name}
+                      title={layoutName(layout.id)}
                       scale={0.62}
                     />
                   </span>

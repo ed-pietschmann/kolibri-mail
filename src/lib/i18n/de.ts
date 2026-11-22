@@ -430,6 +430,33 @@ export const de = {
   'today.upcoming': 'Nächste Tage',
 
   'common.close': 'Schließen',
+  'format.yesterday': 'Gestern',
+  'design.Klar': 'Klar',
+  'design.Papier': 'Papier',
+  'design.Notiz': 'Notiz',
+  'design.Geschäftsbrief': 'Geschäftsbrief',
+  'design.Angebot': 'Angebot',
+  'design.Executive': 'Executive',
+  'design.Einladung': 'Einladung',
+  'design.Feier': 'Feier',
+  'design.Sommer': 'Sommer',
+  'designText.note': 'Kurz notiert',
+  'designText.subject': 'Betreff:',
+  'designText.reply': 'Antworten',
+  'designText.invitation': 'Einladung',
+  'designText.warmly': 'Herzlich,',
+  'designText.hello_from': 'Hallo aus dem Postfach von',
+  'signature.f.greetingDefault': 'Viele Grüße',
+  'signature.layout.classic': 'Klassisch',
+  'signature.layout.logo': 'Mit Logo',
+  'signature.layout.modern': 'Modern',
+  'signature.layout.card': 'Karte',
+  'signature.layout.personal': 'Persönlich',
+  'signature.layout.minimal': 'Schlicht',
+  'templates.sample':
+    '<p>Hallo Anna,</p><p>hier steht dein Text – genau so, wie du ihn im Verfassen-Fenster schreibst.</p><p>Viele Grüße<br>Alex</p>',
+  'templates.sampleName': 'Alex Beispiel',
+  'templates.sampleSubject': 'Neuigkeiten aus dem Projekt',
 } as const;
 
 export type MessageKey = keyof typeof de;

@@ -1,4 +1,5 @@
 /** Datums-Helfer für die Kalenderansichten (lokale Zeit, Woche beginnt Montag). */
+import { locale, t } from './i18n';
 
 export type View = 'day' | 'week' | 'month';
 
@@ -63,7 +64,7 @@ export function isoWeek(d: Date): number {
   return Math.ceil(((t.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7);
 }
 
-const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('de-DE', o);
+const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(locale.intl, o);
 export const fmtTime = fmt({ hour: '2-digit', minute: '2-digit' });
 export const fmtWeekdayShort = fmt({ weekday: 'short' });
 export const fmtDayMonth = fmt({ day: 'numeric', month: 'short' });
@@ -95,7 +96,7 @@ export function spanText(start: number, end: number, allDay: boolean): string {
   if (allDay) {
     const last = addDays(e, -1);
     return sameDay(s, last)
-      ? 'ganztägig'
+      ? t('calendar.allDay')
       : `${fmtDayMonth.format(s)} – ${fmtDayMonth.format(last)}`;
   }
   if (sameDay(s, e)) return `${fmtTime.format(s)}–${fmtTime.format(e)}`;

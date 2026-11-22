@@ -1,11 +1,12 @@
 //! Kalender: CalDAV-Abgleich, Termine anzeigen/anlegen/ändern/löschen,
 //! Einladungen aus Mails annehmen oder ablehnen.
 
+use kolibri_core::lang::{Lang, current, tr};
 use kolibri_core::{Account, AccountId, Error, ErrorKind, Invite, MessageId, Result, SecretStore};
 use kolibri_dav::Url;
 use kolibri_dav::{Dav, calendar_candidates, ical};
 use kolibri_mail::compose::{
-    build_invite_reply, build_itip, escape_html, german_date, new_message_id,
+    build_invite_reply, build_itip, date_time_separator, escape_html, long_date, new_message_id,
 };
 use kolibri_store::{
     CalendarId, CalendarInfo, DavSource, EventId, EventRecord, LOCAL_URL, OutboxKind,
@@ -327,17 +328,20 @@ fn main_event(cal: &ical::Calendar) -> Option<(ical::Event, i64, i64)> {
 
 /// „Freitag, 20. November 2026, 14:00–15:00 Uhr“ bzw. nur das Datum.
 fn when_text(start: i64, end: i64, all_day: bool) -> String {
-    let s = german_date(start);
-    let (day, time) = s.split_once(" um ").unwrap_or((s.as_str(), ""));
+    let sep = date_time_separator();
+    // „Uhr“ nur im Deutschen.
+    let uhr = tr(" Uhr", "");
+    let s = long_date(start);
+    let (day, time) = s.split_once(sep).unwrap_or((s.as_str(), ""));
     if all_day {
         return day.to_owned();
     }
-    let e = german_date(end);
-    let (end_day, end_time) = e.split_once(" um ").unwrap_or((e.as_str(), ""));
+    let e = long_date(end);
+    let (end_day, end_time) = e.split_once(sep).unwrap_or((e.as_str(), ""));
     if end_day == day {
-        format!("{day}, {time}–{end_time} Uhr")
+        format!("{day}, {time}–{end_time}{uhr}")
     } else {
-        format!("{day}, {time} Uhr – {end_day}, {end_time} Uhr")
+        format!("{day}, {time}{uhr} – {end_day}, {end_time}{uhr}")
     }
 }
 
@@ -349,30 +353,48 @@ fn invite_texts(
     location: &str,
     organizer: &str,
 ) -> (String, String, String) {
-    let (prefix, lead) = match kind {
-        InviteMail::New => (
+    let en = current() == Lang::En;
+    let (prefix, lead) = match (kind, en) {
+        (InviteMail::New, false) => (
             "Einladung",
             format!("{organizer} lädt dich zu einem Termin ein."),
         ),
-        InviteMail::Changed => (
+        (InviteMail::New, true) => (
+            "Invitation",
+            format!("{organizer} invited you to an event."),
+        ),
+        (InviteMail::Changed, false) => (
             "Geändert",
             format!("{organizer} hat einen Termin geändert."),
         ),
-        InviteMail::Cancelled => ("Abgesagt", format!("{organizer} hat den Termin abgesagt.")),
+        (InviteMail::Changed, true) => ("Updated", format!("{organizer} updated an event.")),
+        (InviteMail::Cancelled, false) => {
+            ("Abgesagt", format!("{organizer} hat den Termin abgesagt."))
+        }
+        (InviteMail::Cancelled, true) => ("Cancelled", format!("{organizer} cancelled the event.")),
+    };
+    let please = tr(
+        "Bitte sag in deinem Kalender zu oder ab.",
+        "Please accept or decline in your calendar.",
+    );
+    let (l_where, l_when, l_from) = if en {
+        ("Where", "When", "From")
+    } else {
+        ("Ort", "Wann", "Von")
     };
     let subject = format!("{prefix}: {summary}");
     let mut text = format!("{lead}\n\n{summary}\n{when}\n");
     if !location.is_empty() {
-        text.push_str(&format!("Ort: {location}\n"));
+        text.push_str(&format!("{l_where}: {location}\n"));
     }
     if kind != InviteMail::Cancelled {
-        text.push_str("\nBitte sag in deinem Kalender zu oder ab.\n");
+        text.push_str(&format!("\n{please}\n"));
     }
     let place = if location.is_empty() {
         String::new()
     } else {
         format!(
-            "<tr><td style=\"padding:2px 0;color:#6e6e73;width:56px\">Ort</td><td style=\"padding:2px 0\">{}</td></tr>",
+            "<tr><td style=\"padding:2px 0;color:#6e6e73;width:56px\">{l_where}</td><td style=\"padding:2px 0\">{}</td></tr>",
             escape_html(location)
         )
     };
@@ -389,16 +411,19 @@ fn invite_texts(
 <p style=\"margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6e6e73\">{prefix}</p>\
 <p style=\"margin:0 0 14px;font-size:22px;line-height:1.25;font-weight:700;{title_style}\">{summary}</p>\
 <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" style=\"font-size:14px\">\
-<tr><td style=\"padding:2px 0;color:#6e6e73;width:56px\">Wann</td><td style=\"padding:2px 0\">{when}</td></tr>{place}\
-<tr><td style=\"padding:2px 0;color:#6e6e73\">Von</td><td style=\"padding:2px 0\">{organizer}</td></tr></table>\
+<tr><td style=\"padding:2px 0;color:#6e6e73;width:56px\">{l_when}</td><td style=\"padding:2px 0\">{when}</td></tr>{place}\
+<tr><td style=\"padding:2px 0;color:#6e6e73\">{l_from}</td><td style=\"padding:2px 0\">{organizer}</td></tr></table>\
 <p style=\"margin:18px 0 0;color:#6e6e73\">{lead_html}</p></td></tr></table></td></tr></table></body></html>",
         summary = escape_html(summary),
         when = escape_html(when),
         organizer = escape_html(organizer),
         lead_html = if kind == InviteMail::Cancelled {
-            "Der Termin findet nicht statt.".to_owned()
+            tr(
+                "Der Termin findet nicht statt.",
+                "The event will not take place.",
+            )
         } else {
-            "Bitte sag in deinem Kalender zu oder ab.".to_owned()
+            please
         },
     );
     (subject, text, html)
@@ -1075,10 +1100,11 @@ impl AppState {
         } else {
             &account.display_name
         };
-        let (prefix, verb) = if accept {
-            ("Zugesagt", "hat zugesagt")
-        } else {
-            ("Abgesagt", "hat abgesagt")
+        let (prefix, verb) = match (accept, current()) {
+            (true, Lang::De) => ("Zugesagt", "hat zugesagt"),
+            (false, Lang::De) => ("Abgesagt", "hat abgesagt"),
+            (true, Lang::En) => ("Accepted", "accepted"),
+            (false, Lang::En) => ("Declined", "declined"),
         };
         let built = build_invite_reply(
             &account,

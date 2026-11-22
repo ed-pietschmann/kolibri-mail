@@ -60,14 +60,21 @@ jobs:
           releaseBody: |
             ## Download
 
-            - **macOS** (Apple Silicon und Intel, ab macOS 13): `Kolibri_…_universal.dmg`
-            - **Windows** (Vorschau, ab Windows 10): `Kolibri_…_x64-setup.exe`
+            - **macOS** (Apple Silicon and Intel, macOS 13+): `Kolibri_…_universal.dmg`
+            - **Windows** (preview, Windows 10+): `Kolibri_…_x64-setup.exe`
 
-            Kolibri ist nicht bei Apple bzw. Microsoft signiert. Beim ersten Start:
+            Kolibri is not signed by Apple or Microsoft. On first launch:
 
-            - **macOS:** Rechtsklick auf Kolibri → „Öffnen“. Falls macOS es trotzdem
-              blockiert: Systemeinstellungen → Datenschutz & Sicherheit → „Dennoch öffnen“.
-            - **Windows:** Bei „Der Computer wurde durch Windows geschützt“ auf
-              „Weitere Informationen“ → „Trotzdem ausführen“ klicken.
+            - **macOS:** right-click Kolibri → “Open”. If macOS still blocks it:
+              System Settings → Privacy & Security → “Open Anyway”.
+            - **Windows:** if you see “Windows protected your PC”, click
+              “More info” → “Run anyway”.
 
-            Die Windows-Version ist neu und noch wenig getestet – Rückmeldungen gern als Issue.
+            The Windows version is new and not widely tested yet – feedback welcome as an issue.
+
+            ---
+
+            **Deutsch:** macOS: `…_universal.dmg`, Windows (Vorschau): `…_x64-setup.exe`.
+            Beim ersten Start auf dem Mac Rechtsklick → „Öffnen“, unter Windows
+            „Weitere Informationen“ → „Trotzdem ausführen“. Details im
+            [README](https://github.com/ed-pietschmann/kolibri-mail/blob/main/README.de.md).

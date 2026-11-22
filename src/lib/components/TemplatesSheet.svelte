@@ -4,7 +4,14 @@
   import { api, ApiError, CONTENT_PLACEHOLDER, type Template } from '../api';
   import { describeError } from '../errors';
   import { t } from '../i18n';
-  import { hasContentSlot, library, loadLibrary, TEMPLATE_SKELETON } from '../library.svelte';
+  import {
+    designTexts,
+    hasContentSlot,
+    library,
+    loadLibrary,
+    templateName,
+    TEMPLATE_SKELETON,
+  } from '../library.svelte';
   import HtmlPreview from './HtmlPreview.svelte';
   import Icon from './Icon.svelte';
   import Sheet from './Sheet.svelte';
@@ -17,9 +24,7 @@
   let { open, onclose }: { open: boolean; onclose: () => void } = $props();
 
   /** Beispieltext für die Vorschau. */
-  const SAMPLE =
-    '<p>Hallo Anna,</p><p>hier steht dein Text – genau so, wie du ihn im Verfassen-Fenster ' +
-    'schreibst.</p><p>Viele Grüße<br>Eddie</p>';
+  const SAMPLE = t('templates.sample');
 
   let editing = $state<Template | null>(null);
   let dirty = $state(false);
@@ -37,11 +42,11 @@
   });
 
   function sample(html: string): string {
-    return html
+    return designTexts(html)
       .replaceAll(CONTENT_PLACEHOLDER, SAMPLE)
-      .replaceAll('{{name}}', 'Eddie Beispiel')
-      .replaceAll('{{email}}', 'eddie@beispiel.de')
-      .replaceAll('{{betreff}}', 'Neuigkeiten aus dem Projekt');
+      .replaceAll('{{name}}', t('templates.sampleName'))
+      .replaceAll('{{email}}', 'alex@example.com')
+      .replaceAll('{{betreff}}', t('templates.sampleSubject'));
   }
 
   async function select(tpl: Template | null) {
@@ -56,7 +61,7 @@
   async function create(from?: Template) {
     await select({
       id: 0,
-      name: from ? t('templates.copyName', { name: from.name }) : t('templates.newName'),
+      name: from ? t('templates.copyName', { name: templateName(from) }) : t('templates.newName'),
       html: from?.html ?? TEMPLATE_SKELETON,
       builtin: false,
     });
@@ -136,10 +141,10 @@
               onclick={() => void select(tpl)}
             >
               <span class="thumb">
-                <HtmlPreview html={sample(tpl.html)} title={tpl.name} scale={0.28} />
+                <HtmlPreview html={sample(tpl.html)} title={templateName(tpl)} scale={0.28} />
               </span>
               <span class="meta">
-                <span class="name">{tpl.name}</span>
+                <span class="name">{templateName(tpl)}</span>
                 <span class="kind">
                   {tpl.builtin
                     ? t('templates.builtin')
@@ -175,7 +180,7 @@
       {#if editing}
         <div class="top">
           {#if editing.builtin}
-            <h3>{editing.name}</h3>
+            <h3>{templateName(editing)}</h3>
             <span class="pill">{t('templates.builtin')}</span>
             <span class="spacer"></span>
             <button class="btn" onclick={() => editing && void create(editing)}>

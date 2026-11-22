@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Erzeugt crates/store/migrations/011_designs.sql aus den Design-Vorlagen unten.
+"""Erzeugt crates/store/migrations/013_designs_i18n.sql aus den Design-Vorlagen unten.
 
 Die Vorlagen sind mailtauglich: Tabellen-Layout, nur Inline-Styles, max. 600 px,
 Systemschriften. Platzhalter: {{inhalt}}, {{name}}, {{email}}, {{betreff}}.
@@ -67,7 +67,7 @@ DESIGNS.append((
             '<table role="presentation" cellpadding="0" cellspacing="0"><tr>'
             '<td style="width:10px;height:10px;border-radius:5px;background:#f2b705;font-size:0">&nbsp;</td>'
             f'<td style="padding-left:10px;font-family:{SANS};font-size:12px;font-weight:700;letter-spacing:.06em;'
-            'text-transform:uppercase;color:#8a6d00">Kurz notiert</td></tr></table></td></tr>'
+            'text-transform:uppercase;color:#8a6d00">{{t:note}}</td></tr></table></td></tr>'
             f'<tr><td style="padding:10px 36px 0;font-family:{SERIF};font-size:24px;line-height:1.3;color:#3d3200">{{{{betreff}}}}</td></tr>'
             f'<tr><td style="padding:14px 36px 34px;font-family:{SANS};font-size:15px;line-height:1.65;color:#3d3a2a">{{{{inhalt}}}}</td></tr>'
         ),
@@ -89,7 +89,7 @@ DESIGNS.append((
             '<a href="mailto:{{email}}" style="color:#7a8699;text-decoration:none">{{email}}</a></td>'
             "</tr></table></td></tr>"
             f'<tr><td style="padding:36px 44px 8px;font-family:{SANS};font-size:13px;font-weight:600;color:#1f3a5f">'
-            "Betreff: {{betreff}}</td></tr>"
+            "{{t:subject}} {{betreff}}</td></tr>"
             f'<tr><td style="padding:12px 44px 40px;font-family:{SANS};font-size:15px;line-height:1.7;color:#25303f">{{{{inhalt}}}}</td></tr>'
             f'<tr><td style="padding:20px 44px;background:#1f3a5f;font-family:{SANS};font-size:12px;color:#c9d6e8">'
             '{{name}} &nbsp;·&nbsp; <a href="mailto:{{email}}" style="color:#ffffff;text-decoration:none">{{email}}</a></td></tr>'
@@ -110,7 +110,7 @@ DESIGNS.append((
             f'<tr><td style="padding:40px 44px 16px;font-family:{SANS};font-size:15px;line-height:1.7;color:#1e293b">{{{{inhalt}}}}</td></tr>'
             '<tr><td style="padding:8px 44px 40px">'
             '<table role="presentation" cellpadding="0" cellspacing="0"><tr>'
-            f'<td style="border-radius:10px;background:#0f172a"><a href="mailto:{{{{email}}}}" style="display:inline-block;padding:13px 22px;font-family:{SANS};font-size:14px;font-weight:700;color:#ffffff;text-decoration:none">Antworten &rarr;</a></td>'
+            f'<td style="border-radius:10px;background:#0f172a"><a href="mailto:{{{{email}}}}" style="display:inline-block;padding:13px 22px;font-family:{SANS};font-size:14px;font-weight:700;color:#ffffff;text-decoration:none">{{{{t:reply}}}} &rarr;</a></td>'
             "</tr></table></td></tr>"
             f'<tr><td style="padding:22px 44px;background:#f8fafc;border-top:1px solid #e2e8f0;font-family:{SANS};font-size:12px;color:#64748b">'
             "{{name}} · {{email}}</td></tr>"
@@ -143,11 +143,11 @@ DESIGNS.append((
         (
             '<tr><td align="center" style="padding:52px 40px 44px;background:#ff7a59">'
             f'<div style="font-family:{SERIF};font-size:18px;letter-spacing:.5em;color:#ffe3d8">&#10022; &#10022; &#10022;</div>'
-            f'<div style="margin-top:14px;font-family:{SANS};font-size:12px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#ffffff">Einladung</div>'
+            f'<div style="margin-top:14px;font-family:{SANS};font-size:12px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#ffffff">{{{{t:invitation}}}}</div>'
             f'<div style="margin-top:12px;font-family:{SERIF};font-size:36px;line-height:1.15;color:#ffffff">{{{{betreff}}}}</div>'
             "</td></tr>"
             f'<tr><td align="center" style="padding:40px 48px 12px;font-family:{SANS};font-size:16px;line-height:1.75;color:#3b2a24">{{{{inhalt}}}}</td></tr>'
-            f'<tr><td align="center" style="padding:12px 48px 48px;font-family:{SERIF};font-size:18px;font-style:italic;color:#ff7a59">Herzlich, {{{{name}}}}</td></tr>'
+            f'<tr><td align="center" style="padding:12px 48px 48px;font-family:{SERIF};font-size:18px;font-style:italic;color:#ff7a59">{{{{t:warmly}}}} {{{{name}}}}</td></tr>'
         ),
         560,
     )),
@@ -186,7 +186,7 @@ DESIGNS.append((
             '<td style="height:10px;background:#0f766e">&nbsp;</td><td style="height:10px;background:#14b8a6">&nbsp;</td>'
             '<td style="height:10px;background:#fbbf24">&nbsp;</td><td style="height:10px;background:#fb7185">&nbsp;</td>'
             "</tr></table></td></tr>"
-            f'<tr><td style="padding:40px 44px 0;font-family:{SANS};font-size:13px;font-weight:700;color:#0f766e">Hallo aus dem Postfach von {{{{name}}}} &#9728;</td></tr>'
+            f'<tr><td style="padding:40px 44px 0;font-family:{SANS};font-size:13px;font-weight:700;color:#0f766e">{{{{t:hello_from}}}} {{{{name}}}} &#9728;</td></tr>'
             f'<tr><td style="padding:10px 44px 0;font-family:{SANS};font-size:30px;line-height:1.2;font-weight:800;letter-spacing:-.02em;color:#0b3b37">{{{{betreff}}}}</td></tr>'
             f'<tr><td style="padding:22px 44px 44px;font-family:{SANS};font-size:16px;line-height:1.7;color:#24423f">{{{{inhalt}}}}</td></tr>'
         ),
@@ -201,14 +201,14 @@ def sql_str(s: str) -> str:
 
 def main() -> None:
     out = [
-        "-- 1.3: neue mitgelieferte Designs (erzeugt von scripts/gen-templates.py).",
+        "-- Mitgelieferte Designs (erzeugt von scripts/gen-templates.py).",
         "-- Eigene Vorlagen bleiben unberührt.",
         "DELETE FROM templates WHERE builtin = 1;",
         "INSERT INTO templates (name, builtin, sort_order, html) VALUES",
     ]
     rows = [f"({sql_str(n)}, 1, {i}, {sql_str(h)})" for i, (n, h) in enumerate(DESIGNS)]
     out.append(",\n".join(rows) + ";")
-    target = Path(__file__).resolve().parent.parent / "crates/store/migrations/011_designs.sql"
+    target = Path(__file__).resolve().parent.parent / "crates/store/migrations/013_designs_i18n.sql"
     target.write_text("\n".join(out) + "\n", encoding="utf-8")
     print(f"{len(DESIGNS)} Designs → {target}")
 

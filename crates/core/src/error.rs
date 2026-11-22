@@ -40,7 +40,8 @@ impl Error {
     pub fn new(kind: ErrorKind, detail: impl Into<String>) -> Self {
         Self {
             kind,
-            detail: detail.into(),
+            // In der Sprache der Oberfläche (Quelltexte sind deutsch).
+            detail: crate::lang::translate(&detail.into()),
         }
     }
 }

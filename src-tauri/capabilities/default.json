@@ -1,0 +1,30 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Minimale Rechte: Fenster ziehen/zoomen, Ereignisse, Links aus Mails im Browser öffnen (nur http/https/mailto), Dateiauswahl für Anhänge. Eigene Commands sind über generate_handler! freigegeben.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:event:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-internal-toggle-maximize",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://*"
+        },
+        {
+          "url": "http://*"
+        },
+        {
+          "url": "mailto:*"
+        }
+      ]
+    },
+    "dialog:allow-open",
+    "dialog:allow-save"
+  ]
+}

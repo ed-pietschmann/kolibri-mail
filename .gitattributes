@@ -1,0 +1,5 @@
+# Einheitliche Zeilenenden (Tests vergleichen Texte byte-genau, auch unter Windows).
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.icns binary

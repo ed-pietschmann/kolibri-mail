@@ -1,0 +1,73 @@
+name: Release
+
+# Neue Version veröffentlichen: Tag pushen, z. B.
+#   git tag v1.4.0 && git push origin v1.4.0
+# GitHub baut dann macOS (Apple Silicon + Intel) und Windows und legt einen
+# Release-Entwurf mit den Downloads an. Den Entwurf auf GitHub prüfen und veröffentlichen.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            os: macos-latest
+            args: --target universal-apple-darwin
+          - name: Windows
+            os: windows-latest
+            args: ''
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ runner.os == 'macOS' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+      - uses: Swatinem/rust-cache@v2
+
+      - name: NASM (für aws-lc unter Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/setup-nasm@v1
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Kolibri ${{ github.ref_name }}'
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
+          releaseBody: |
+            ## Download
+
+            - **macOS** (Apple Silicon und Intel, ab macOS 13): `Kolibri_…_universal.dmg`
+            - **Windows** (Vorschau, ab Windows 10): `Kolibri_…_x64-setup.exe`
+
+            Kolibri ist nicht bei Apple bzw. Microsoft signiert. Beim ersten Start:
+
+            - **macOS:** Rechtsklick auf Kolibri → „Öffnen“. Falls macOS es trotzdem
+              blockiert: Systemeinstellungen → Datenschutz & Sicherheit → „Dennoch öffnen“.
+            - **Windows:** Bei „Der Computer wurde durch Windows geschützt“ auf
+              „Weitere Informationen“ → „Trotzdem ausführen“ klicken.
+
+            Die Windows-Version ist neu und noch wenig getestet – Rückmeldungen gern als Issue.

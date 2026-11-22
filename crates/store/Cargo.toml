@@ -1,0 +1,21 @@
+[package]
+name = "kolibri-store"
+description = "Lokaler SQLite-Cache mit Migrationen"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+kolibri-core.workspace = true
+rusqlite = { version = "0.43", default-features = false, features = ["bundled", "cache"] }
+log.workspace = true
+serde.workspace = true
+serde_json = "1"
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true

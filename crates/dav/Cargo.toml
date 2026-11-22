@@ -1,0 +1,22 @@
+[package]
+name = "kolibri-dav"
+description = "CardDAV (später CalDAV): Erkennung, Abgleich, vCard"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+kolibri-core.workspace = true
+log.workspace = true
+serde.workspace = true
+reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
+quick-xml = "0.42"
+jiff = { version = "1", default-features = false, features = ["std", "tz-system", "tzdb-zoneinfo", "tzdb-bundle-platform"] }
+
+[dev-dependencies]
+tokio = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,39 @@
+{
+  "name": "kolibri",
+  "private": true,
+  "license": "MIT",
+  "version": "1.4.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "tauri": "tauri",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json --fail-on-warnings && tsc -p tsconfig.node.json",
+    "format": "prettier --write . && cargo fmt --all",
+    "lint": "prettier --check . && pnpm check && cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings",
+    "measure": "bash scripts/measure.sh",
+    "dist": "CI=true tauri build",
+    "update-app": "bash scripts/update-app.sh"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@tauri-apps/cli": "^2.12.6",
+    "@tsconfig/svelte": "^5.0.8",
+    "@types/node": "^24.19.2",
+    "prettier": "^3.10.1",
+    "prettier-plugin-svelte": "^4.2.0",
+    "svelte": "^5.57.3",
+    "svelte-check": "^4.7.7",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.6"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.12.5",
+    "@tauri-apps/plugin-dialog": "^2.8.4",
+    "@tauri-apps/plugin-opener": "^2.7.3",
+    "@tiptap/core": "3.34.0",
+    "@tiptap/extension-placeholder": "3.34.0",
+    "@tiptap/pm": "3.34.0",
+    "@tiptap/starter-kit": "3.34.0"
+  }
+}

@@ -20,25 +20,25 @@ Reduziert auf das Wesentliche: weniger Features, dafür jedes richtig gut.
 
 ## Getroffene Entscheidungen
 
-| Thema                     | Entscheidung                                                                                                                                                                |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Name / Bundle-ID          | Kolibri / `app.kolibri.mail`                                                                                                                                                |
-| Stack                     | Tauri 2 (Rust) + Svelte 5 + TypeScript (strict) + Vite, keine UI-Bibliothek                                                                                                 |
-| Design                    | Hell + Dunkel nach Systemeinstellung, Vorbild des Nutzers („Casepost“-Stil): flache Seitenleiste, „Tinte“-Knöpfe, Karten-Liste – siehe `DESIGN.md`                          |
-| Mail-Anbieter des Nutzers | Purelymail (IMAP/SMTP, vermutlich CalDAV/CardDAV – in M8/M9 prüfen)                                                                                                         |
-| Server-Erkennung          | Eingebaute Liste (Purelymail) → Anbieter-Autoconfig → ISPDB → MX → DNS-SRV → Raten → manuell. Nie die volle Adresse senden                                                  |
-| Testserver                | Stalwart v1.1.1, wird bei Bedarf mit `scripts/test-server.sh install` in `.dev/` geladen (Daten am 20.11.2026 auf Wunsch gelöscht), nur 127.0.0.1                           |
-| Editor                    | Tiptap 3 (StarterKit + Placeholder), 384 KB / 125 KB gz, **nur per `import()` beim Verfassen geladen** (`src/lib/editor.ts`)                                                |
-| Cache                     | Letzte 6 Monate komplett offline, ältere nur Header                                                                                                                         |
-| Threads                   | Ordnerübergreifend (inkl. Gesendet)                                                                                                                                         |
-| Signierung                | Kein Apple-Developer-Account → Ad-hoc-signierter Build; Windows unsigniert                                                                                                  |
-| DB                        | `rusqlite` (bundled, FTS5) + eigene Migrationen über `user_version`; Mutex-Verbindung (Schreib-Thread ab M3)                                                                |
-| Schlüsselbund             | `security-framework` direkt (statt `keyring` 4.x), hinter Trait `SecretStore`; Dienst `app.kolibri.mail`, Konto `account-<id>`                                              |
-| TLS                       | rustls + aws-lc-rs + `rustls-platform-verifier` (macOS-Zertifikatsspeicher) für IMAP, SMTP und HTTP                                                                         |
-| Verfassen                 | Schwebendes Fenster unten rechts im Hauptfenster (kein zweites Fenster = kein extra WebKit-Prozess); Lesen nebenbei möglich                                                 |
-| Signaturen/Vorlagen       | Signatur = festes Tiptap-Element (`div[data-kolibri-signature]`, HTML unverändert); Vorlagen = HTML mit `{{inhalt}}`, eingesetzt in Rust beim Senden; data:-Bilder → `cid:` |
-| Symbole                   | Lucide (ISC), nur benötigte Formen in `Icon.svelte` eingebettet, keine Abhängigkeit                                                                                         |
-| Lint Frontend             | Prettier + svelte-check (bewusst kein ESLint: viele Abhängigkeiten, TS strict deckt das Wichtigste ab)                                                                      |
+| Thema                     | Entscheidung                                                                                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name / Bundle-ID          | Kolibri / `app.kolibri.mail`                                                                                                                                                    |
+| Stack                     | Tauri 2 (Rust) + Svelte 5 + TypeScript (strict) + Vite, keine UI-Bibliothek                                                                                                     |
+| Design                    | Hell + Dunkel nach Systemeinstellung, Vorbild des Nutzers („Casepost“-Stil): flache Seitenleiste, „Tinte“-Knöpfe, Karten-Liste – siehe `DESIGN.md`                              |
+| Mail-Anbieter des Nutzers | Purelymail (IMAP/SMTP, vermutlich CalDAV/CardDAV – in M8/M9 prüfen)                                                                                                             |
+| Server-Erkennung          | Eingebaute Liste (Purelymail) → Anbieter-Autoconfig → ISPDB → MX → DNS-SRV → Raten → manuell. Nie die volle Adresse senden                                                      |
+| Testserver                | Stalwart v1.1.1, wird bei Bedarf mit `scripts/test-server.sh install` in `.dev/` geladen (Server und Test-Mails auf Wunsch gelöscht, zuletzt geprüft 22.11.2026), nur 127.0.0.1 |
+| Editor                    | Tiptap 3 (StarterKit + Placeholder), 384 KB / 125 KB gz, **nur per `import()` beim Verfassen geladen** (`src/lib/editor.ts`)                                                    |
+| Cache                     | Letzte 6 Monate komplett offline, ältere nur Header                                                                                                                             |
+| Threads                   | Ordnerübergreifend (inkl. Gesendet)                                                                                                                                             |
+| Signierung                | Kein Apple-Developer-Account → Ad-hoc-signierter Build; Windows unsigniert                                                                                                      |
+| DB                        | `rusqlite` (bundled, FTS5) + eigene Migrationen über `user_version`; Mutex-Verbindung (Schreib-Thread ab M3)                                                                    |
+| Schlüsselbund             | `security-framework` direkt (statt `keyring` 4.x), hinter Trait `SecretStore`; Dienst `app.kolibri.mail`, Konto `account-<id>`                                                  |
+| TLS                       | rustls + aws-lc-rs + `rustls-platform-verifier` (macOS-Zertifikatsspeicher) für IMAP, SMTP und HTTP                                                                             |
+| Verfassen                 | Schwebendes Fenster unten rechts im Hauptfenster (kein zweites Fenster = kein extra WebKit-Prozess); Lesen nebenbei möglich                                                     |
+| Signaturen/Vorlagen       | Signatur = festes Tiptap-Element (`div[data-kolibri-signature]`, HTML unverändert); Vorlagen = HTML mit `{{inhalt}}`, eingesetzt in Rust beim Senden; data:-Bilder → `cid:`     |
+| Symbole                   | Lucide (ISC), nur benötigte Formen in `Icon.svelte` eingebettet, keine Abhängigkeit                                                                                             |
+| Lint Frontend             | Prettier + svelte-check (bewusst kein ESLint: viele Abhängigkeiten, TS strict deckt das Wichtigste ab)                                                                          |
 
 ## Architektur
 
@@ -379,8 +379,8 @@ Bekannte Punkte:
   `security add-generic-password -s app.kolibri.mail -a account-<id> -w … -T <Kolibri.app>`
   hinterlegen (nach jedem Neubau neu anlegen, sonst fragt macOS). Danach wieder entfernen.
 - Computer Use ist in dieser Umgebung nicht verfügbar; UI-Prüfung über Browser-Vorschau mit
-  `src/dev/mock.ts` (`pnpm dev`, `?mock=5000` / `?mock=empty`). WebKit wie in der App:
-  Playwright-WebKit liegt unter `~/Library/Caches/ms-playwright/webkit-2359`.
+  `src/dev/mock.ts` (`pnpm dev`, `?mock=5000` / `?mock=empty`, `?lang=en`). Playwright-WebKit
+  wurde am 22.11.2026 auf Wunsch gelöscht (bei Bedarf neu: `pnpm dlx playwright install webkit`).
 - Echte App automatisiert bedienen (nur Debug-Build): `KOLIBRI_EVAL=<skript.js>` führt nach dem
   Start JS in der Oberfläche aus; Ausgaben per `invoke('report_frontend_error', …)` ins Protokoll.
   Mit `HOME=<testordner>` läuft die App mit eigener Datenbank (Nutzerdaten unberührt; für den
